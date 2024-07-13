@@ -22,6 +22,11 @@ contract TreasuryTest is Test {
     address public constant investor2 = address(0x2);
 
     function setUp() public {
+        // Create a fund token and mint some tokens to investors
+        fundToken = new FundToken(address(this));
+        fundToken.mint(investor1, 1000e18);
+        fundToken.mint(investor2, 1000e18);
+        
         // Create a timelock and dao contract
         address[] memory proposers = new address[](1);
         proposers[0] = investor1;
@@ -32,10 +37,7 @@ contract TreasuryTest is Test {
         timelock.grantRole(timelock.PROPOSER_ROLE(), address(governor));
         timelock.grantRole(timelock.EXECUTOR_ROLE(), address(governor));
 
-        fundToken = new FundToken(address(this));
-        fundToken.mint(investor1, 1000e18);
-        fundToken.mint(investor2, 1000e18);
-
+        // Create a investment treasury
         treasury = new Treasury(
             company,
             address(timelock),
