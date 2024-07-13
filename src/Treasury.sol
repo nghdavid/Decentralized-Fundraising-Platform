@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (finance/VestingWallet.sol)
-pragma solidity ^0.8.20;  
+pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/finance/VestingWallet.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20Mint} from "./interfaces/IERC20.sol";
@@ -29,7 +29,14 @@ contract Treasury is VestingWallet, AccessControl {
         startTimestamp = _startTimestamp;
     }
 
-    function withdrawToInvestor() public onlyRole(DAO_ROLE) {}
+    function withdrawToInvestor() public onlyRole(DAO_ROLE) {
+        IERC20Mint fundedToken = IERC20Mint(token);
+        uint256 total_amount = fundedToken.balanceOf(address(this));
+        require(total_amount > 0, "No funds to withdraw");
+        for (uint i = 0; i < _payees.length; i++) {
+            fundedToken.transfer(_payees[i], total_amount * _shares[_payees[i]] / _totalShares);
+        }
+    }
 
     function receiveFromInvestor(uint256 amount) public {
         require(block.timestamp < startTimestamp, "Funding has ended");
