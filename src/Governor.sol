@@ -19,8 +19,9 @@ contract MyGovernor is
 {
     constructor(
         IVotes _token,
-        TimelockController _timelock
-    ) Governor("MyGovernor") GovernorVotes(_token) GovernorVotesQuorumFraction(4) GovernorTimelockControl(_timelock) {}
+        TimelockController _timelock,
+        string memory _name
+    ) Governor(_name) GovernorVotes(_token) GovernorVotesQuorumFraction(4) GovernorTimelockControl(_timelock) {}
 
     function votingDelay() public pure override returns (uint256) {
         // return 7200; // 1 day

@@ -28,12 +28,10 @@ contract TreasuryTest is Test {
         fundToken.mint(investor2, 1000e18);
         
         // Create a timelock and dao contract
-        address[] memory proposers = new address[](1);
-        proposers[0] = investor1;
         uint256 timelockDelay = 1;
-        timelock = new TimeLock(timelockDelay, proposers, new address[](0), address(this));
+        timelock = new TimeLock(timelockDelay, new address[](0), new address[](0), address(this));
         voteToken = new VoteToken(address(this));
-        governor = new MyGovernor(voteToken, timelock);
+        governor = new MyGovernor(voteToken, timelock, "MyDAO");
         timelock.grantRole(timelock.PROPOSER_ROLE(), address(governor));
         timelock.grantRole(timelock.EXECUTOR_ROLE(), address(governor));
 
