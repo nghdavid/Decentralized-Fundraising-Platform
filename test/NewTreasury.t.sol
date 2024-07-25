@@ -48,12 +48,88 @@ contract NewTreasuryTest is Test {
         console.log("Treasury", daoinfo.treasury);
         console.log("DAO address", dao);
         // Investors approve the treasury to spend their funds
-        // vm.prank(investor1);
-        // fundToken.approve(address(treasury), 1000e18);
-        // vm.prank(investor2);
-        // fundToken.approve(address(treasury), 1000e18);
+        vm.prank(investor1);
+        fundToken.approve(daoinfo.treasury, 1000e18);
+        vm.prank(investor2);
+        fundToken.approve(daoinfo.treasury, 1000e18);
+        
+        governor = MyGovernor(payable(dao));
+        treasury = Treasury(payable(daoinfo.treasury));
+        timelock = TimeLock(payable(daoinfo.timelock));
+        voteToken = VoteToken(daoinfo.voteToken);
     }
 
     function testWithdraw() public {
+        // Investors invest in the treasury
+        uint256 investment = 1000e18;
+        console.log("Investment is", investment*2);
+        vm.prank(investor1);
+        treasury.receiveFromInvestor(investment);
+        vm.prank(investor1);
+        voteToken.delegate(investor1);
+        vm.prank(investor2);
+        treasury.receiveFromInvestor(investment);
+        vm.prank(investor2);
+        voteToken.delegate(investor2);
+        
+        console.log("Before release, treasury has", fundToken.balanceOf(address(treasury)));
+        // Move time to middle of vesting period
+        vm.warp(block.timestamp + block.timestamp + fundraiseTime + duration / 2);
+        vm.prank(company);
+        // Treasury releases funds to company
+        treasury.release(address(fundToken));
+        console.log("Company gets", fundToken.balanceOf(company));
+        console.log(
+            "After release, treasury has",
+            fundToken.balanceOf(address(treasury))
+        );
+
+        address[] memory targets = new address[](1); // Contract thats going to be called
+        uint256[] memory values = new uint256[](1); // Ether to be sent
+        bytes[] memory calldatas = new bytes[](1); // Function signature and parameters
+        targets[0] = address(treasury);
+        values[0] = 0;
+        calldatas[0] = abi.encodeWithSelector(
+            treasury.withdrawToInvestor.selector
+        );
+
+        string memory PROPOSAL_DESCRIPTION = "withdrawToInvestor";
+        uint256 proposalId = governor.propose(
+            targets,
+            values,
+            calldatas,
+            PROPOSAL_DESCRIPTION
+        );
+
+        // Voting starts
+        vm.roll(block.number + governor.votingDelay() + 1);
+
+        vm.prank(investor1);
+        governor.castVote(proposalId, 1);
+        vm.prank(investor2);
+        governor.castVote(proposalId, 1);
+
+        // Voting ends
+        vm.roll(block.number + governor.votingPeriod());
+
+        // Queue execution into timelock contract
+        governor.queue(
+            targets,
+            values,
+            calldatas,
+            keccak256(abi.encodePacked(PROPOSAL_DESCRIPTION))
+        );
+
+        // After timelock delay, execute proposal
+        vm.warp(block.timestamp + timelock.getMinDelay());
+        governor.execute(
+            targets,
+            values,
+            calldatas,
+            keccak256(abi.encodePacked(PROPOSAL_DESCRIPTION))
+        );
+
+        console.log("Investor wallet1", fundToken.balanceOf(investor1));
+        console.log("Investor wallet2", fundToken.balanceOf(investor2));
     }
 }
