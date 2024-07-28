@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (finance/VestingWallet.sol)
 pragma solidity ^0.8.20;
-import "@openzeppelin/contracts/finance/VestingWallet.sol";
+import {VestingWallet} from "./VestingWallet.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20Mint} from "./interfaces/IERC20.sol";
 contract Treasury is VestingWallet, AccessControl {
