@@ -7,6 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /**
  * @dev A vesting wallet is an ownable contract that can receive native currency and ERC20 tokens, and release these
@@ -27,24 +28,26 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * NOTE: When using this contract with any token whose balance is adjusted automatically (i.e. a rebase token), make
  * sure to account the supply/balance adjustment in the vesting schedule to ensure the vested amount is as intended.
  */
-contract VestingWallet is Context, Ownable {
+contract VestingWallet is Context, Ownable, Initializable {
     event EtherReleased(uint256 amount);
     event ERC20Released(address indexed token, uint256 amount);
 
     uint256 private _released;
     mapping(address token => uint256) private _erc20Released;
-    uint64 private immutable _start;
-    uint64 private immutable _duration;
+    uint64 private _start;
+    uint64 private _duration;
 
     /**
      * @dev Sets the sender as the initial owner, the beneficiary as the pending owner, the start timestamp and the
      * vesting duration of the vesting wallet.
      */
-    constructor(address beneficiary, uint64 startTimestamp, uint64 durationSeconds) payable Ownable(beneficiary) {
+    constructor(address beneficiary) payable Ownable(beneficiary) {}
+    
+    function initialize(uint64 startTimestamp, uint64 durationSeconds) initializer public {
         _start = startTimestamp;
         _duration = durationSeconds;
     }
-
+    
     /**
      * @dev The contract should be able to receive Eth.
      */

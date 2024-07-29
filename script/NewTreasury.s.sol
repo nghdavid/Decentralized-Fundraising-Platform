@@ -30,13 +30,13 @@ contract TreasuryScript is Script {
         // fundToken.mint(account, 1000e18);
 
         // GovernorFactory governorFactory = new GovernorFactory();
-        // TreasuryFactory treasuryFactory = new TreasuryFactory();
+        TreasuryFactory treasuryFactory = new TreasuryFactory();
         GovernorFactory governorFactory = GovernorFactory(
             0x5b9CcF2EcC30047A98D915fF52777dcAB07d7cAA
         );
-        TreasuryFactory treasuryFactory = TreasuryFactory(
-            0x103aB2934CDF80DA3Bb258bf031d167680Ea3c93
-        );
+        // TreasuryFactory treasuryFactory = TreasuryFactory(
+        //     0x103aB2934CDF80DA3Bb258bf031d167680Ea3c93
+        // );
         // TimeLock timelock = new TimeLock(
         //     timelockDelay,
         //     new address[](0),
@@ -72,11 +72,17 @@ contract TreasuryScript is Script {
         //     daoinfo.voteToken,
         //     daoinfo.daoName
         // );
+        address calTreasuryAddr = treasuryFactory.calculateTreasuryAddr(
+            address(timelock),
+            address(voteToken),
+            account
+        );
         console.log("Timelock", address(timelock));
         console.log("VoteToken", address(voteToken));
         console.log("DAO address", 0x015034bd9e594a29FE544bD9F3713241Ff396b14);
         console.log("Treasury", daoinfo.treasury);
         console.log("Treasury", treasuryAddress);
+        console.log("Calculated Treasury", calTreasuryAddr);
         console.log("GovernorFactory", address(governorFactory));
         console.log("TreasuryFactory", address(treasuryFactory));
 
