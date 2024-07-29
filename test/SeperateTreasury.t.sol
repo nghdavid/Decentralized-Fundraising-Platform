@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {Test, console} from "forge-std/Test.sol";
 import {TreasuryFactory} from "../src/NewTreasuryFactory.sol";
 import {GovernorFactory} from "../src/GovernorFactory.sol";
-import {Treasury} from "../src/Treasury.sol";
+import {Treasury} from "../src/NewTreasury.sol";
 import {FundToken} from "../src/FundToken.sol";
 import {VoteToken} from "../src/VoteToken.sol";
 import {MyGovernor} from "../src/Governor.sol";
