@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {VestingWallet} from "./VestingWallet.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20Mint} from "./interfaces/IERC20.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 
 contract Treasury is VestingWallet, AccessControl {
@@ -15,6 +14,16 @@ contract Treasury is VestingWallet, AccessControl {
     uint256 private _totalShares;
     mapping(address => uint256) private _shares;
     address[] private _payees;
+    bool private _initialized;
+
+    modifier initializer() {
+        require(
+            !_initialized,
+            "Contract instance has already been initialized"
+        );
+        _initialized = true;
+        _;
+    }
 
     event PayeeAdded(address account, uint256 shares);
 
@@ -26,7 +35,7 @@ contract Treasury is VestingWallet, AccessControl {
         address _daoToken,
         uint64 _startTimestamp,
         uint64 _durationSeconds
-    ) public initializer {
+    ) public initializer{
         VestingWallet.initialize(_startTimestamp, _durationSeconds);
         _grantRole(DAO_ROLE, timelock);
         startTimestamp = _startTimestamp;
