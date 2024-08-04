@@ -8,18 +8,30 @@ import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Vo
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 
 contract VoteToken is ERC20, ERC20Permit, ERC20Votes, Ownable {
-    constructor(address initialOwner) ERC20("VoteToken", "VTK") ERC20Permit("VoteToken") Ownable(initialOwner) {}
+    constructor(
+        address initialOwner
+    )
+        ERC20("VoteToken", "VTK")
+        ERC20Permit("VoteToken")
+        Ownable(initialOwner)
+    {}
 
     // The functions below are overrides required by Solidity.
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
-    function _update(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
+    function _update(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
         super._update(from, to, amount);
     }
 
-    function nonces(address owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
+    function nonces(
+        address owner
+    ) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
         return super.nonces(owner);
     }
 }

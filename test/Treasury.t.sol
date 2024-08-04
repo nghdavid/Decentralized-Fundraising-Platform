@@ -7,21 +7,21 @@ import {GovernorFactory} from "../src/GovernorFactory.sol";
 import {Treasury} from "../src/Treasury.sol";
 import {FundToken} from "../src/FundToken.sol";
 import {VoteToken} from "../src/VoteToken.sol";
-import {MyGovernor} from "../src/Governor.sol";
+import {Dao} from "../src/Governor.sol";
 import {TimeLock} from "../src/TimeLock.sol";
 import {DAOInfo} from "../src/utils/DaoStorage.sol";
 
 contract NewTreasuryTest is Test {
     Treasury treasury;
-    TreasuryFactory treasuryFactory;
-    GovernorFactory governorFactory;
     FundToken fundToken;
     VoteToken voteToken;
-    MyGovernor public governor;
+    Dao public governor;
     TimeLock public timelock;
+    TreasuryFactory treasuryFactory;
+    GovernorFactory governorFactory;
     uint32 fundraiseTime = 1000; // fundraising duration
     uint32 duration = 100; // vesting duration of the vesting wallet
-    string daoName = "MyDAO";
+    string fundraiseName = "MyDAO";
     uint256 public constant timelockDelay = 1;
     address public constant company = address(0x6);
     address public constant investor1 = address(0x1);
@@ -43,14 +43,15 @@ contract NewTreasuryTest is Test {
             address(governorFactory)
         );
         voteToken = new VoteToken(address(treasuryFactory));
+        
         address daoAddress = governorFactory.createDao(
-            daoName,
+            fundraiseName,
             address(voteToken),
             address(timelock)
         );
 
         address treasuryAddress = treasuryFactory.createTreasury(
-            daoName,
+            fundraiseName,
             address(fundToken),
             address(voteToken),
             address(timelock),
@@ -69,22 +70,20 @@ contract NewTreasuryTest is Test {
             address(voteToken),
             company
         );
+        
+        console.log("Timelock", daoinfo.timelock);
+        console.log("VoteToken", daoinfo.voteToken);
+        console.log("DAO address", daoAddress);
         console.log("Treasury", treasuryAddr);
-
-        // address dao = governorFactory.calculateDaoAddr(daoinfo.timelock, daoinfo.voteToken, daoinfo.daoName);
-        // console.log("Timelock", daoinfo.timelock);
-        // console.log("VoteToken", daoinfo.voteToken);
-        // console.log("Treasury", daoinfo.treasury);
-        // console.log("DAO address", dao);
 
         // Investors approve the treasury to spend their funds
         vm.prank(investor1);
-        fundToken.approve(daoinfo.treasury, 1000e18);
+        fundToken.approve(treasuryAddr, 1000e18);
         vm.prank(investor2);
-        fundToken.approve(daoinfo.treasury, 1000e18);
+        fundToken.approve(treasuryAddr, 1000e18);
 
-        governor = MyGovernor(payable(daoAddress));
-        treasury = Treasury(payable(daoinfo.treasury));
+        governor = Dao(payable(daoAddress));
+        treasury = Treasury(payable(treasuryAddr));
         timelock = TimeLock(payable(daoinfo.timelock));
         voteToken = VoteToken(daoinfo.voteToken);
     }

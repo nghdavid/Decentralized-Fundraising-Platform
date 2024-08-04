@@ -2,15 +2,16 @@
 pragma solidity ^0.8.20;
 
 import {Treasury} from "./Treasury.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {DAOInfo} from "./utils/DaoStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TreasuryFactory {
     mapping(address => mapping(address => DAOInfo[])) public DAOInfos;
 
     function createTreasury(
-        string memory _daoName,
+        string memory fundraiseName,
         address fundToken,
         address voteToken,
         address timelock,
@@ -18,6 +19,7 @@ contract TreasuryFactory {
         uint32 fundraiseTime,
         uint32 duration
     ) public returns (address treasuryAddress) {
+        // Create a treasury contract
         bytes32 salt = keccak256(abi.encodePacked(timelock, voteToken));
         Treasury treasury = new Treasury{salt: salt}(company);
         treasury.initialize(
@@ -27,12 +29,20 @@ contract TreasuryFactory {
             uint64(block.timestamp + fundraiseTime),
             duration
         );
+        treasuryAddress = address(treasury);
+
+        // Store fundraise information
         DAOInfos[msg.sender][company].push(
-            DAOInfo(timelock, voteToken, address(treasury), _daoName)
+            DAOInfo(timelock, voteToken, fundraiseName)
         );
+        // Vote token shouldn't be minted before
+        require(
+            IERC20(voteToken).totalSupply() == 0,
+            "Vote token already minted"
+        );
+        // Transfer ownership of vote token to treasury
         Ownable voteTokenOwnable = Ownable(voteToken);
         voteTokenOwnable.transferOwnership(address(treasury));
-        treasuryAddress = address(treasury);
     }
 
     function getDAOInfo(

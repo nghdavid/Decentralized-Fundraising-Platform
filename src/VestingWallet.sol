@@ -27,7 +27,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * NOTE: When using this contract with any token whose balance is adjusted automatically (i.e. a rebase token), make
  * sure to account the supply/balance adjustment in the vesting schedule to ensure the vested amount is as intended.
  */
-contract VestingWallet is Context, Ownable{
+contract VestingWallet is Context, Ownable {
     event EtherReleased(uint256 amount);
     event ERC20Released(address indexed token, uint256 amount);
 
@@ -41,12 +41,15 @@ contract VestingWallet is Context, Ownable{
      * vesting duration of the vesting wallet.
      */
     constructor(address beneficiary) payable Ownable(beneficiary) {}
-    
-    function initialize (uint64 startTimestamp, uint64 durationSeconds) internal {
+
+    function initialize(
+        uint64 startTimestamp,
+        uint64 durationSeconds
+    ) internal {
         _start = startTimestamp;
         _duration = durationSeconds;
     }
-    
+
     /**
      * @dev The contract should be able to receive Eth.
      */
@@ -129,22 +132,34 @@ contract VestingWallet is Context, Ownable{
     /**
      * @dev Calculates the amount of ether that has already vested. Default implementation is a linear vesting curve.
      */
-    function vestedAmount(uint64 timestamp) public view virtual returns (uint256) {
+    function vestedAmount(
+        uint64 timestamp
+    ) public view virtual returns (uint256) {
         return _vestingSchedule(address(this).balance + released(), timestamp);
     }
 
     /**
      * @dev Calculates the amount of tokens that has already vested. Default implementation is a linear vesting curve.
      */
-    function vestedAmount(address token, uint64 timestamp) public view virtual returns (uint256) {
-        return _vestingSchedule(IERC20(token).balanceOf(address(this)) + released(token), timestamp);
+    function vestedAmount(
+        address token,
+        uint64 timestamp
+    ) public view virtual returns (uint256) {
+        return
+            _vestingSchedule(
+                IERC20(token).balanceOf(address(this)) + released(token),
+                timestamp
+            );
     }
 
     /**
      * @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for
      * an asset given its total historical allocation.
      */
-    function _vestingSchedule(uint256 totalAllocation, uint64 timestamp) internal view virtual returns (uint256) {
+    function _vestingSchedule(
+        uint256 totalAllocation,
+        uint64 timestamp
+    ) internal view virtual returns (uint256) {
         if (timestamp < start()) {
             return 0;
         } else if (timestamp >= end()) {
