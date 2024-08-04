@@ -2,21 +2,27 @@
 pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
+import {TreasuryFactory} from "../src/TreasuryFactory.sol";
+import {GovernorFactory} from "../src/GovernorFactory.sol";
 import {Treasury} from "../src/Treasury.sol";
 import {FundToken} from "../src/FundToken.sol";
 import {VoteToken} from "../src/VoteToken.sol";
 import {MyGovernor} from "../src/Governor.sol";
 import {TimeLock} from "../src/TimeLock.sol";
+import {DAOInfo} from "../src/utils/DaoStorage.sol";
 
-contract TreasuryTest is Test {
+contract NewTreasuryTest is Test {
     Treasury treasury;
+    TreasuryFactory treasuryFactory;
+    GovernorFactory governorFactory;
     FundToken fundToken;
     VoteToken voteToken;
     MyGovernor public governor;
     TimeLock public timelock;
     uint32 fundraiseTime = 1000; // fundraising duration
     uint32 duration = 100; // vesting duration of the vesting wallet
-
+    string daoName = "MyDAO";
+    uint256 public constant timelockDelay = 1;
     address public constant company = address(0x6);
     address public constant investor1 = address(0x1);
     address public constant investor2 = address(0x2);
@@ -26,37 +32,67 @@ contract TreasuryTest is Test {
         fundToken = new FundToken(address(this));
         fundToken.mint(investor1, 1000e18);
         fundToken.mint(investor2, 1000e18);
-        
-        // Create a timelock and dao contract
-        uint256 timelockDelay = 1;
-        timelock = new TimeLock(timelockDelay, new address[](0), new address[](0), address(this));
-        voteToken = new VoteToken(address(this));
-        governor = new MyGovernor(voteToken, timelock, "MyDAO");
-        timelock.grantRole(timelock.PROPOSER_ROLE(), address(governor));
-        timelock.grantRole(timelock.EXECUTOR_ROLE(), address(governor));
 
-        // Create a investment treasury
-        treasury = new Treasury(
-            company,
-            address(timelock),
-            uint64(block.timestamp + fundraiseTime),
-            duration,
-            address(fundToken),
-            address(voteToken)
+        governorFactory = new GovernorFactory();
+        treasuryFactory = new TreasuryFactory();
+
+        timelock = new TimeLock(
+            timelockDelay,
+            new address[](0),
+            new address[](0),
+            address(governorFactory)
         );
-        voteToken.transferOwnership(address(treasury));
+        voteToken = new VoteToken(address(treasuryFactory));
+        address daoAddress = governorFactory.createDao(
+            daoName,
+            address(voteToken),
+            address(timelock)
+        );
+
+        address treasuryAddress = treasuryFactory.createTreasury(
+            daoName,
+            address(fundToken),
+            address(voteToken),
+            address(timelock),
+            company,
+            fundraiseTime,
+            duration
+        );
+        
+        DAOInfo memory daoinfo = treasuryFactory.getDAOInfo(
+            address(this),
+            company
+        )[0];
+        
+        address treasuryAddr = treasuryFactory.calculateTreasuryAddr(
+            address(timelock),
+            address(voteToken),
+            company
+        );
+        console.log("Treasury", treasuryAddr);
+
+        // address dao = governorFactory.calculateDaoAddr(daoinfo.timelock, daoinfo.voteToken, daoinfo.daoName);
+        // console.log("Timelock", daoinfo.timelock);
+        // console.log("VoteToken", daoinfo.voteToken);
+        // console.log("Treasury", daoinfo.treasury);
+        // console.log("DAO address", dao);
 
         // Investors approve the treasury to spend their funds
         vm.prank(investor1);
-        fundToken.approve(address(treasury), 1000e18);
+        fundToken.approve(daoinfo.treasury, 1000e18);
         vm.prank(investor2);
-        fundToken.approve(address(treasury), 1000e18);
+        fundToken.approve(daoinfo.treasury, 1000e18);
+
+        governor = MyGovernor(payable(daoAddress));
+        treasury = Treasury(payable(daoinfo.treasury));
+        timelock = TimeLock(payable(daoinfo.timelock));
+        voteToken = VoteToken(daoinfo.voteToken);
     }
 
     function testWithdraw() public {
         // Investors invest in the treasury
         uint256 investment = 1000e18;
-        console.log("Investment is", investment*2);
+        console.log("Investment is", investment * 2);
         vm.prank(investor1);
         treasury.receiveFromInvestor(investment);
         vm.prank(investor1);
@@ -65,10 +101,15 @@ contract TreasuryTest is Test {
         treasury.receiveFromInvestor(investment);
         vm.prank(investor2);
         voteToken.delegate(investor2);
-        
-        console.log("Before release, treasury has", fundToken.balanceOf(address(treasury)));
+
+        console.log(
+            "Before release, treasury has",
+            fundToken.balanceOf(address(treasury))
+        );
         // Move time to middle of vesting period
-        vm.warp(block.timestamp + block.timestamp + fundraiseTime + duration / 2);
+        vm.warp(
+            block.timestamp + block.timestamp + fundraiseTime + duration / 2
+        );
         vm.prank(company);
         // Treasury releases funds to company
         treasury.release(address(fundToken));
