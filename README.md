@@ -52,4 +52,4 @@ Backend Repo (Ongoing)
 - Run: forge install OpenZeppelin/openzeppelin-contracts
 - Run: source .env
 - Run: forge test --match-path test/Treasury.t.sol -vvv (Simulate whole process)
-- Run: forge script script/Treasury.s.sol:TreasuryScript --rpc-url $SEPOLIA_RPC_URL --fork-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv (Deploy contract)
+- Run: forge script script/Treasury.s.sol:TreasuryScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv (Deploy contract)
