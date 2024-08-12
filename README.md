@@ -7,7 +7,7 @@ Backend Repo (Ongoing)
 
 - GovernorFactory [Sepolia](https://sepolia.etherscan.io/address/0xC0218aC712f49871CfDf875eB773a422D48B7947) 
 - TreasuryFactory [Sepolia](https://sepolia.etherscan.io/address/0x73cCC25c8f13e18B81059B3e39a11aE04dd8B382) 
-- Dao(Governor) [Sepolia](https://sepolia.etherscan.io/address/0xfDAEBafc1B656829Fcf43468a62Cf25e86412842) 
+- Dao (Governor) [Sepolia](https://sepolia.etherscan.io/address/0xfDAEBafc1B656829Fcf43468a62Cf25e86412842) 
 - Treasury [Sepolia](https://sepolia.etherscan.io/address/0x804A572C205b3C0490e84d0834127CD44A84192B) 
 - TimeLock [Sepolia](https://sepolia.etherscan.io/address/0x0FaF2F23647AD8FAA94aCe13635Df22A48A34A90) 
 - VoteToken [Sepolia](https://sepolia.etherscan.io/address/0x9A78475BE1412bC735d940dbf6A7270367cAa226) 
@@ -31,7 +31,7 @@ Backend Repo (Ongoing)
 - Ethers.js
 
 ## Contracts Architecture
-<img width="70%" alt="contract_arch" src="./docs/readme/contract_arch.jpeg">
+<img width="90%" alt="contract_arch" src="./docs/readme/contract_arch.jpeg">
 
 ### Contract Factory
 - Users can create customized DAOs and treasuries using GovernanceFactory and TreasuryFactory.
