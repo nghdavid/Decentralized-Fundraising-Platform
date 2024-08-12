@@ -31,7 +31,7 @@ Backend Repo (Ongoing)
 - Ethers.js
 
 ## Contracts Architecture
-<img width="70%" alt="table_schema" src="./docs/readme/contract_arch.jpeg">
+<img width="70%" alt="contract_arch" src="./docs/readme/contract_arch.jpeg">
 
 ### Contract Factory
 - Users can create customized DAOs and treasuries using GovernanceFactory and TreasuryFactory.
