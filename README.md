@@ -32,9 +32,20 @@ Backend Repo(Ongoing)
 
 ## Contracts Architecture
 
+### Contract Factory
+- Users can create customized DAOs and treasuries using GovernanceFactory and TreasuryFactory.
+- Users can calculate the address of the created contract using Create2 method.
+- Treasury and Dao information is stored in TreasuryFactory.
+### Dao
+- Investors can vote on proposals and then retrieve left funds from the treasury if the company's performance doesn't meet their expectations.
+### Treasury
+- The treasury can release funds to the company with a linear release schedule.
+- The treasury can mint vote tokens(For Dao) to investors who deposit fundtoken(Ex: USDT) to the treasury.
+### Timelock
+- The timelock can delay the execution of transactions for a certain period of time.
 
 ## How to start my project
-- Claim ETH from [Alchemy](https://www.alchemy.com/faucets/arbitrum-sepolia).
+- Claim ETH from [Alchemy](https://www.alchemy.com/faucets/ethereum-sepolia).
 - Fill in .env (private key, sepolia rpc url, etherscan api key).
 - Install foundry.
 - Run: forge install OpenZeppelin/openzeppelin-contracts
