@@ -21,10 +21,11 @@ Backend Repo(Ongoing)
 - **Flexible fund management**: Investors can withdraw their funds through a decentralized process, subject to DAO voting mechanisms.
 
 ## Smart contract Technique
-- [Vesting wallet](https://docs.openzeppelin.com/contracts/5.x/api/finance#VestingWallet)
-- [On-chain governance](https://docs.openzeppelin.com/contracts/5.x/api/governance)
+- [Vesting Wallet](https://docs.openzeppelin.com/contracts/5.x/api/finance#VestingWallet)
+- [On-chain Governance](https://docs.openzeppelin.com/contracts/5.x/api/governance)
 - Contract Factory(Create2)
-- Timelock
+- [Timelock](https://docs.openzeppelin.com/contracts/5.x/api/governance#GovernorTimelockControl)
+- [Advanced AccessControl](https://docs.openzeppelin.com/contracts/5.x/api/access#AccessControl)
 
 ## Backend Technique
 - Ethers.js
